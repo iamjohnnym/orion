@@ -1,0 +1,20 @@
+[
+  { 
+    "long": "--username",
+    "short": "-u",
+    "help": "AWS UserName"
+    },{
+    "long": "--groupname",
+    "short": "-n",
+    "help": "AWS GroupName"
+    },{
+    "long": "--set-key",
+    "short": "-k",
+    "help": "AWS GroupName",
+    "action": "store_true"
+    },{
+    "long": "--file-name",
+    "short": "-f",
+    "help": "File with list of users to create"
+    }
+  ]

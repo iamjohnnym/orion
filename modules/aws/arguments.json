@@ -1,0 +1,21 @@
+[
+  { 
+    "long": "--aws-asset",
+    "short": "-s",
+    "help": "Service to STS to"
+    },{
+    "long": "--method",
+    "short": "-m",
+    "help": "AWS Boto3 Method to Call"
+    },{
+    "long": "--method-args",
+    "short": "-M",
+    "help": "Boto3 **kwargs to pass to method"
+    },{
+    "long": "--pprint",
+    "short": "-p",
+    "help": "Pretty Print Returned Data",
+    "action": "store_true"
+    }
+  ]
+

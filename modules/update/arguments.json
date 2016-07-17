@@ -1,0 +1,8 @@
+[
+  { 
+    "long": "--branch",
+    "short": "-b",
+    "help": "Branch to Update to",
+    "default": "master"
+    }
+  ]

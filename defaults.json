@@ -1,0 +1,24 @@
+[
+  { 
+    "long": "--aws-account",
+    "short": "-a",
+    "help": "AWS Account Number",
+    "required": "True"
+    },{
+    "long": "--role-name",
+    "short": "-G",
+    "help": "Role Name for CloudTrails",
+    "default": "OrionCommandLine"
+    },{
+    "long": "--region",
+    "short": "-r",
+    "help": "Region",
+    "choices": ["us-east-1","us-east-2","eu-west-2"],
+    "default": "us-east-1"
+    },{
+    "long": "--role",
+    "short": "-g",
+    "help": "Role Name, used for STS",
+    "default": "AssumeRole"
+    }
+  ]
