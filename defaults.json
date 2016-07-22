@@ -20,5 +20,11 @@
     "short": "-g",
     "help": "Role Name, used for STS",
     "default": "AssumeRole"
+    },{
+    "long": "--output",
+    "short": "-o",
+    "help": "Desired Output",
+    "choices": ["json","table","pprint","csv"],
+    "default": "json"
     }
   ]

@@ -2,9 +2,16 @@
 
 
 from libs.connections import AWSConnections
+from libs.template import Mixins
 
 
-class Ec2(AWSConnections):
+class Ec2(Mixins,AWSConnections):
+    def __init__(self, **kwargs):
+        self.args = kwargs
+        self.args['aws_asset'] = 'ec2'
+        self.args['resource'] = 'client'
+        self.loadClient()
+
     def loadClient(self):
         self.client = self.assumeAccount()
 
@@ -29,19 +36,18 @@ class Ec2(AWSConnections):
                         item['StateReason']
                         )
 
-
     def run(self):
         ilist = []
+        key_filter = ['InstanceId', 'StateTransitionReason']
         for item in self.describeInstances()['Reservations']:
             for instance in item['Instances']:
                 idict = {}
-                idict['InstanceId'] = instance['InstanceId']
-                idict['State'] = instance['State']['Name']
-                idict['StateReason'] = instance['StateTransitionReason']
                 for tag in instance['Tags']:
                     if tag['Key'] == 'Name':
                         idict['Name'] = tag['Value']
+                for key in key_filter:
+                    if instance[key]:
+                        idict[key] = instance[key]
                 ilist.append(idict)
-
-        return ilist
+        self.table(self.sortList(ilist))
 
