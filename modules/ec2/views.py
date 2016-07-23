@@ -6,7 +6,7 @@ from libs.template import Mixins
 
 
 filters = {
-        "build": ['InstanceType','VpcId','PrivateIpAddress','PublicIpAddress', 'AvailabilityZone','SubnetId','Tenancy','SecurityGroups']
+        "build": ['InstanceType','VpcId','PrivateIpAddress','PublicIpAddress', 'AvailabilityZone','SubnetId','Tenancy','SecurityGroups','BlockDeviceMappings']
         }
 
 
@@ -32,23 +32,6 @@ class Ec2(Mixins,AWSConnections):
         ec2 = self.client.describe_instances()
         return ec2
 
-    def printInstances(self, instances):
-        for item in instances:
-            if item.has_key('Name'):
-                print "{0:<20} | {1:<12} | {2} | {3:<30}".format(
-                        item['Name'],
-                        item['InstanceId'],
-                        item['State'],
-                        item['StateReason']
-                        )
-            else:
-                print "{0:<20} | {1:<12} | {2} | {3:<30}".format(
-                        'Unnamed',
-                        item['InstanceId'],
-                        item['State'],
-                        item['StateReason']
-                        )
-
     def getFilter(self, filter_name):
         self.args['program_path']
         return loadFile("{0}/modules/ec2/filter_groups/{1}".filter(
@@ -59,7 +42,7 @@ class Ec2(Mixins,AWSConnections):
     def run(self):
         ilist = []
         key_filter = filters[self.args['filter_group']]
-        for item in self.describeInstances()['Reservations']:
+        for item in self.client.describe_instances()['Reservations']:
             for instance in item['Instances']:
                 idict = {}
                 for tag in instance['Tags']:
@@ -78,6 +61,15 @@ class Ec2(Mixins,AWSConnections):
                                 idict[key] = sg_string.join(sg_list)
                             else:
                                 idict[key] = ','.join(sg_list)
+                        elif key == 'BlockDeviceMappings':
+                            devices = []
+                            for dev in instance[key]:
+                                devices.append(dev['DeviceName'])
+                            if self.args['output'] == 'csv':
+                                dev_string = " \n"
+                                idict[key] = dev_string.join(devices)
+                            else:
+                                idict[key] = ','.join(devices)
                         else:
                             if instance[key]:
                                 idict[key] = instance[key]
