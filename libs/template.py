@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from operator import itemgetter
+import datetime
 import pprint
 import csv
 import os
@@ -9,17 +10,36 @@ import json as js
 class Mixins(object):
     @classmethod
     def csv(self, args, output):
+        """
+        Lets be honest, this right here is the sticks. Some god awful code.
+        It will be cleaned, sanitized, and better.
+        """
+        args['path'] = args['path'].rstrip('/')
         if '~' in args['path']:
+            # Because python doesn't enjoy the ~ flag, we have to expand
+            # that so it creates an absolute path. Keeps
             home = os.path.expanduser('~')
-            path = args['path'].replace('~', home)
+            path = args['path'].replace('~', home).rstrip('/')
             del args['path']
             args['path'] = path
-        self.path = '{0}/{1}.csv'.format(args['path'], args['aws_account'])
+        today = str(datetime.date.today()).replace('-','')
+        self.path = '{0}/{1}.{2}.csv'.format(args['path'], args['aws_account'], today)
+        inc = 0
+        while True:
+            if os.path.isfile(self.path):
+                if inc == 0:
+                    pass
+                else:
+                    self.path = '{0}/{1}.{2}.{3}.csv'.format(args['path'], args['aws_account'], today, inc)
+                inc += 1
+            else:
+                break
         try:
             with open(self.path, 'w') as o:
                 writer = csv.DictWriter(o, output[0])
                 writer.writeheader()
                 writer.writerows(output)
+                print "Your file has been saved to: {0}".format(self.path)
         except AttributeError as e:
             print e
 
