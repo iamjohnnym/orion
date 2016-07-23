@@ -1,2 +1,13 @@
 [
+  { 
+    "long": "--path",
+    "short": "-p",
+    "help": "Save path for CSV",
+    "default": "~/Documents"
+    },{ 
+    "long": "--filter-group",
+    "short": "-F",
+    "help": "Filter your output",
+    "default": "build"
+    }
   ]

@@ -3,23 +3,32 @@
 from operator import itemgetter
 import pprint
 import csv
-
+import os
+import json as js
 
 class Mixins(object):
-    def csv(self):
+    @classmethod
+    def csv(self, args, output):
+        if '~' in args['path']:
+            home = os.path.expanduser('~')
+            path = args['path'].replace('~', home)
+            del args['path']
+            args['path'] = path
+        self.path = '{0}/{1}.csv'.format(args['path'], args['aws_account'])
         try:
-            with open(self.getFilePath(), 'w') as output:
-                writer = csv.DictWriter(output, self.valid_keys)
+            with open(self.path, 'w') as o:
+                writer = csv.DictWriter(o, output[0])
                 writer.writeheader()
-                writer.writerows(self.getValidValues())
+                writer.writerows(output)
         except AttributeError as e:
             print e
 
-    def js(self):
-        pass
+    @classmethod
+    def json(self, args, output):
+        print js.dumps(output)
 
     @classmethod
-    def table(self, output):
+    def table(self, args, output):
         olist = []
         olist.append("{Name:<35}")
         oprint = " | ".join(olist)
@@ -32,20 +41,17 @@ class Mixins(object):
                 print oprint.format(**row)
         else:
             for key in output.keys():
-                olist.append("{%s:<18}" % key)
+                olist.append("{%s:<15}" % key)
                 oprint = " | ".join(olist)
             print oprint.format(**output)
 
     @classmethod
-    def pprint(self, output):
+    def pprint(self, args, output):
         print pprint.pprint(output)
 
     def sortList(self, output):
         return sorted(output, key=itemgetter('Name'))
 
     def template(self, output):
-        del output['ResponseMetadata']
         method = getattr(Mixins, self.args['output'])
-        for key in output:
-            for item in output[key]:
-                method(item)
+        method(self.args, output)
