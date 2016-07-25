@@ -2,8 +2,7 @@
   { 
     "long": "--aws-account",
     "short": "-a",
-    "help": "AWS Account Number",
-    "required": "True"
+    "help": "AWS Account Number"
     },{
     "long": "--role-name",
     "short": "-G",
