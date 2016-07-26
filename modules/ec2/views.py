@@ -6,7 +6,8 @@ from libs.template import Mixins
 
 
 filters = {
-        "build": ['InstanceType','VpcId','PrivateIpAddress','PublicIpAddress', 'AvailabilityZone','SubnetId','Tenancy','SecurityGroups','BlockDeviceMappings']
+        "build": ['InstanceType','VpcId','PrivateIpAddress','PublicIpAddress', 'AvailabilityZone','SubnetId','Tenancy','SecurityGroups','BlockDeviceMappings'],
+        "ips": ['PrivateIpAddress','AvailabilityZone', 'State']
         }
 
 
@@ -70,6 +71,8 @@ class Ec2(Mixins,AWSConnections):
                                 idict[key] = dev_string.join(devices)
                             else:
                                 idict[key] = ','.join(devices)
+                        elif key == 'State':
+                                idict[key] = instance[key]['Name']
                         else:
                             if instance[key]:
                                 idict[key] = instance[key]
