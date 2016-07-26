@@ -41,13 +41,21 @@ class Ec2(Mixins,AWSConnections):
             ))
 
     def run(self):
+        """
+        This is just one big pile of shit.  Clean up on aisle five.
+        """
         ilist = []
         key_filter = filters[self.args['filter_group']]
         for item in self.client.describe_instances()['Reservations']:
             for instance in item['Instances']:
                 idict = {}
                 for tag in instance['Tags']:
+                    if not any(t['Key'] == 'Name' for t in instance['Tags']):
+                        tag['Value'] = 'Unnamed'
+                        idict['Name'] = tag['Value']
                     if tag['Key'] == 'Name':
+                        if tag['Value'] == "":
+                            tag['Value'] = 'Unnamed'
                         idict['Name'] = tag['Value']
                 for key in key_filter:
                     try:
