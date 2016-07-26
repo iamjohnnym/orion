@@ -6,14 +6,11 @@ import pprint
 import csv
 import os
 import json as js
+import ConfigParser
 
 class Mixins(object):
     @classmethod
-    def csv(self, args, output):
-        """
-        Lets be honest, this right here is the sticks. Some god awful code.
-        It will be cleaned, sanitized, and better.
-        """
+    def saveFile(self,args):
         args['path'] = args['path'].rstrip('/')
         if '~' in args['path']:
             # Because python doesn't enjoy the ~ flag, we have to expand
@@ -34,6 +31,15 @@ class Mixins(object):
                 inc += 1
             else:
                 break
+        return self.path
+
+    @classmethod
+    def csv(self, args, output):
+        """
+        Lets be honest, this right here is the sticks. Some god awful code.
+        It will be cleaned, sanitized, and better.
+        """
+        self.path = self.saveFile(args)
         try:
             with open(self.path, 'w') as o:
                 writer = csv.DictWriter(o, output[0])
@@ -46,6 +52,22 @@ class Mixins(object):
     @classmethod
     def json(self, args, output):
         print js.dumps(output)
+
+    @classmethod
+    def ini(self, args, output):
+        config = ConfigParser.ConfigParser(allow_no_value=True)
+        for item in output:
+            try:
+                config.add_section(item['header'])
+                config.set(item['header'], '; {0}'.format(item['name']))
+                config.set(item['header'], 'role_arn', item['role_arn'])
+                config.set(item['header'], 'region', item['region'])
+            except Exception as e:
+                print e
+            with open(args['save_path'], 'w') as ini:
+                config.write(ini)
+            print "Your file has been saved to: {0}".format(self.path)
+
 
     @classmethod
     def table(self, args, output):
