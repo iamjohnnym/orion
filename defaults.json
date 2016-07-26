@@ -23,7 +23,7 @@
     "long": "--output",
     "short": "-o",
     "help": "Desired Output",
-    "choices": ["json","table","pprint","csv"],
+    "choices": ["json","table","pprint","csv", "ini"],
     "default": "json"
     }
   ]
