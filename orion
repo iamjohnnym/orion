@@ -10,11 +10,12 @@ def load_class(class_as_path):
     Load a module from a string.  This allows for glorious modularity and
     minimal changes to the core framework.
 
-    :PARAM: full_class_string :: Full path to the modules class.  The Module's
-                                 directory and the class must be named the
-                                 name the same with the exception that the 
+    :PARAM: STRING : full_class_string :: Full path to the modules class.  The 
+                                 Module's directory and the class must be named
+                                 the name the same with the exception that the 
                                  directory is lowercase while the class has its
                                  first letter capitalized.
+
                                  class_as_path = \
                                    modules/${module_name}/views.${modules_name}
 
