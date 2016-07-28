@@ -5,26 +5,47 @@ import os
 import importlib
 
 
-def load_class(full_class_string):
+def load_class(class_as_path):
     """
-    dynamically load a class from a string
-    """
+    Load a module from a string.  This allows for glorious modularity and
+    minimal changes to the core framework.
 
-    class_data = full_class_string.split(".")
+    :PARAM: full_class_string :: Full path to the modules class.  The Module's
+                                 directory and the class must be named the
+                                 name the same with the exception that the 
+                                 directory is lowercase while the class has its
+                                 first letter capitalized.
+                                 class_as_path = \
+                                   modules/${module_name}/views.${modules_name}
+
+                                 libs.cli
+                                   CLIArguments().getModulePath() should return
+                                   that string
+    """
+    # Parse string for class and its path
+    class_data = class_as_path.split(".")
     module_path = ".".join(class_data[:-1])
     class_str = class_data[-1]
-
+    
+    # Import the module and instantiate the desired module
     module = importlib.import_module(module_path)
-    # Finally, we retrieve the Class
     return getattr(module, class_str)
 
 
 if __name__ == '__main__':
+    """
+    This is where the magic happens
+    # CLIArguments parses the default.json and arguments.json for the
+    # modules command line arguments"""
     cli = CLIArguments(
             os.path.dirname(os.path.realpath(__file__))
             )
     cli.run()
-
+    
+    """
+    Based on the param called for what module to use, instantiate the class and 
+    call the run() method.
+    """
     cli.args.__dict__['program_path'] = cli.program_path
     module = load_class(cli.getModulePath())
     module(
