@@ -3,15 +3,17 @@
 
 from libs.connections import AWSConnections
 from libs.template import Mixins
+from libs.filters import AwsFilters
 
 
 filters = {
         "build": ['InstanceType','VpcId','PrivateIpAddress','PublicIpAddress', 'AvailabilityZone','SubnetId','Tenancy','SecurityGroups','BlockDeviceMappings'],
-        "ips": ['PrivateIpAddress','AvailabilityZone', 'State']
+        "ips": ['PrivateIpAddress','AvailabilityZone', 'State','PublicIpAddress'],
+        "test": ['Tenancy','SecurityGroups','BlockDeviceMappings','AvailabilityZone']
         }
 
 
-class Ec2(Mixins,AWSConnections):
+class Ec2(Mixins,AWSConnections,AwsFilters):
     def __init__(self, **kwargs):
         self.args = kwargs
         self.args['aws_asset'] = 'ec2'
@@ -42,50 +44,31 @@ class Ec2(Mixins,AWSConnections):
 
     def run(self):
         """
-        This is just one big pile of shit.  Clean up on aisle five.
+
         """
         ilist = []
         key_filter = filters[self.args['filter_group']]
         for item in self.client.describe_instances()['Reservations']:
             for instance in item['Instances']:
-                idict = {}
-                for tag in instance['Tags']:
-                    if not any(t['Key'] == 'Name' for t in instance['Tags']):
-                        tag['Value'] = 'Unnamed'
-                        idict['Name'] = tag['Value']
-                    if tag['Key'] == 'Name':
-                        if tag['Value'] == "":
-                            tag['Value'] = 'Unnamed'
-                        idict['Name'] = tag['Value']
+                data = {}
+                # Get the name tag from the AwsFilters object.
+                data['Name'] = self.getNameTag(instance)
+
                 for key in key_filter:
                     try:
-                        if key in ['AvailabilityZone','Tenancy']:
-                            idict[key] = instance['Placement'][key]
-                        elif key == 'SecurityGroups':
-                            sg_list = []
-                            for sg in instance[key]:
-                                sg_list.append(sg['GroupId'])
-                            if self.args['output'] == 'csv':
-                                sg_string = " \n"
-                                idict[key] = sg_string.join(sg_list)
-                            else:
-                                idict[key] = ','.join(sg_list)
-                        elif key == 'BlockDeviceMappings':
-                            devices = []
-                            for dev in instance[key]:
-                                devices.append(dev['DeviceName'])
-                            if self.args['output'] == 'csv':
-                                dev_string = " \n"
-                                idict[key] = dev_string.join(devices)
-                            else:
-                                idict[key] = ','.join(devices)
-                        elif key == 'State':
-                                idict[key] = instance[key]['Name']
+                        method_to_use = 'get{0}'.format(key)
+                        if key in ['AvailabilityZone','Tenancy','State']:
+                            method = getattr(self, method_to_use)
+                            data[key] = method(instance)
+                        elif key in ['SecurityGroups','BlockDeviceMappings']:
+                            method = getattr(self, method_to_use)
+                            data[key] = self.getOutputForList(key, method(instance))
                         else:
                             if instance[key]:
-                                idict[key] = instance[key]
+                                data[key] = instance[key]
                     except Exception as e:
-                        idict[key] = 'N/A'
-                ilist.append(idict)
+                        print e
+                        data[key] = 'N/A'
+                ilist.append(data)
         self.template(self.sortList(ilist))
 

@@ -56,17 +56,41 @@ class Mixins(object):
     @classmethod
     def ini(self, args, output):
         config = ConfigParser.ConfigParser(allow_no_value=True)
+        args['save_path'] = '/Users/jmartin/Documents/initest.ini'
+        headers = []
         for item in output:
-            try:
-                config.add_section(item['header'])
-                config.set(item['header'], '; {0}'.format(item['name']))
-                config.set(item['header'], 'role_arn', item['role_arn'])
-                config.set(item['header'], 'region', item['region'])
-            except Exception as e:
-                print e
-            with open(args['save_path'], 'w') as ini:
-                config.write(ini)
-            print "Your file has been saved to: {0}".format(self.path)
+            count = 1
+            name = item['name'].strip('\n ')
+            clean_name = "{0}".format(name.replace(' ','').replace('-','').lower())
+            header_name = "{0}".format(item['header'])
+            print headers
+            while True:
+                if not set(headers).issubset(set(header_name)):
+                    count += 1
+                    header_name = "{0}".format(header_name)
+                    print '3'
+                elif not set(headers).issubset(header_name):
+                    header_name = "{0}-{1}-{2}".format(header_name,clean_name,count)
+                    count += 1
+                    print '2'
+                elif not set(headers).issubset(set(header_name)):
+                    header_name = "{0}-{1}".format(header_name,clean_name)
+                    print '1'
+                header = "profile {0}".format(header_name)
+                headers.append(header_name)
+
+                try:
+                    config.add_section(header)
+                    config.set(header, '; {0}'.format(name))
+                    config.set(header, 'role_arn', item['role_arn'])
+                    config.set(header, 'region', item['region'])
+                except ConfigParser.DuplicateSectionError as e:
+                    header = "profile {0}-{1}".format(item['header'],item['name'])
+                    print e
+                break
+        with open(args['save_path'], 'w') as ini:
+            config.write(ini)
+        print "Your file has been saved to: {0}".format(args['save_path'])
 
 
     @classmethod
